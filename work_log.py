@@ -39,7 +39,7 @@ def add():
                 user_time = input("Please enter the length of the task in minutes:  ")
             except ValueError:
                 print("Please enter a valid number")
-                user_notes = input("Please enter any additional notes for this task (OPTIONAL):  ")
+        user_notes = input("Please enter any additional notes for this task (OPTIONAL):  ")
         user_date = datetime.datetime.now().strftime("%m/%d/%Y")
         with open("work_log.csv", "a+", newline='') as cvsfile:
             fields = ['Task', 'Time Spent', 'Additional Notes', 'Date']
@@ -291,7 +291,7 @@ def delete_entry(the_entry):
             write.writerow({'Task': row['Task'], 
                             'Time': row['Time Spent'], 
                             'Additional Notes': row['Additional Notes'], 
-                            'Date': row['Notes']})
+                            'Date': row['Date']})
 
 if __name__ == "__main__":
     menu()
