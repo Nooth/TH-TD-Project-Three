@@ -27,18 +27,23 @@ def menu():
         elif user_answer == '2':
             search_by()
         elif user_answer == '3':
+            clear_screen()
+            print("Thank you and have a good day!")
             break
 
 
 def add():
+    clear_screen()
     the_task = user_time = user_notes = None
     while True:
         the_task = input("Please enter your task:  ")
-        while not user_time:
-            try:
-                user_time = input("Please enter the length of the task in minutes:  ")
-            except ValueError:
-                print("Please enter a valid number")
+        while user_time is None:
+            user_time = input("Please enter time to the nearest minutes: ")
+        try:
+            user_time = int(user_time)
+        except ValueError:
+            print("Please enter a valid length of time.")
+            user_time = input("Please enter time to the nearest minute:  ")
         user_notes = input("Please enter any additional notes for this task (OPTIONAL):  ")
         user_date = datetime.datetime.now().strftime("%m/%d/%Y")
         with open("work_log.csv", "a+", newline='') as cvsfile:
@@ -57,6 +62,7 @@ def add():
             menu()
 
 def search_by():
+    clear_screen()
     user_search = None
 
     print("""
@@ -95,18 +101,23 @@ def find_date():
     second_search_date = []
     searched = None
     while not searched:
-        searched = input("Please enter 1 to find an exact date or 2 to find within a range of two dates:  ")
+        clear_screen()
+        searched = input("""
+        Please enter 
+        1: to find an exact date 
+        2: to find within a range of two dates
+        >>>   """)
         if searched not in ['1' , '2']:
             print("Not a valid selection. Please enter 1 or 2.")
             searched = None
     date_list(first_search_date)
     if searched == '2':
-        print("Please enter an end date in MM/DD/YYYY format:  ")
+        print("Please enter an end date in MM/DD/YYYY format")
         while not second_search_date:
             date_list(second_search_date)
-        if first_search_date[0].timestamp() > second_search_date[0].timestamp():
-            print("The first date cannot be later thn the second date. Please enter end date again:  ")
-            second_search_date = []
+            if first_search_date[0] > second_search_date[0]:
+                print("The first date cannot be later than the second date. Please enter end date again")
+                second_search_date = []
     results = []
     with open('work_log.csv') as file:
         reader = csv.DictReader(file)
@@ -116,8 +127,8 @@ def find_date():
                     results.append(row)
         else:
             for row in reader:
-                if ((datetime.datetime.strptime(row['Date'], '%m/%d/%Y').timestamp() >= first_search_date[0].timestamp()) and 
-                    (datetime.datetime.strptime(row['Date'], '%m/%d/%Y').timestamp() <= second_search_date[0].timestamp())):
+                if ((datetime.datetime.strptime(row['Date'], '%m/%d/%Y') >= first_search_date[0]) and 
+                    (datetime.datetime.strptime(row['Date'], '%m/%d/%Y') <= second_search_date[0])):
                     results.append(row)
     if len(results) == 0:
         print("No results found.")
@@ -134,7 +145,7 @@ def find_time():
         try:
             searched_time = int(searched_time)
         except ValueError:
-            print("Please enter a valid date")
+            print("Please enter a valid length of time.")
             searched_time = None
         else:
             searched_time = str(searched_time)
@@ -195,6 +206,7 @@ def find_regex():
             show_results(searched_results)
 
 def show_results(result_list):
+    clear_screen()
     counter = 1 #used for pagination 
     for item in result_list:
         print("""
@@ -202,10 +214,17 @@ def show_results(result_list):
             Task: {}
             Time Length: {}
             Date: {}
-            Notes: {}""".format(counter, len(result_list), item["Task"], item['Time Spent'], item['Date'], item['Additional Notes']))
+            Notes: {}\n""".format(counter, len(result_list), item["Task"], item['Time Spent'], item['Date'], item['Additional Notes']))
         user_selection = None
         while not user_selection:
-            user_selection = input("Please Select {}[E] for Edit entry, [D] for Delete entry, [S] for the Search Menu:  ".format('[N] for New Result, ' if counter < len(result_list) else ''))
+            user_selection = input("""
+            Please Select...
+            {}
+            [E] for Edit entry, 
+            [D] for Delete entry, 
+            [S] for the Search Menu:  
+            """.format('''
+            [N] for Next Result ''' if counter < len(result_list) else ''))
             if user_selection.lower() == 'e':
                 edit_entry(item)
             elif user_selection.lower() == 'd':
@@ -213,7 +232,8 @@ def show_results(result_list):
             elif user_selection.lower() == 's':
                 return search_by()
             elif user_selection.lower() == 'n':
-                user_selection == None
+                user_selection == None  
+                clear_screen()          
         counter += 1
     print("End of search results\n")
     search_by()
@@ -289,7 +309,7 @@ def delete_entry(the_entry):
         write.writeheader()
         for row in edit:
             write.writerow({'Task': row['Task'], 
-                            'Time': row['Time Spent'], 
+                            'Time Spent': row['Time Spent'], 
                             'Additional Notes': row['Additional Notes'], 
                             'Date': row['Date']})
 
